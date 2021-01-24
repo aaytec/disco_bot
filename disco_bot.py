@@ -54,29 +54,15 @@ class client:
 
         @self.bot.command()
         async def join(ctx):
-
-            if(ctx.guild.id not in self.guild_state_map):
-                self.guild_state_map[ctx.guild.id] = state.SERVER_STANDBY;
-
-            guild_state = self.guild_state_map[ctx.guild.id]
-            
-            if(guild_state == state.SERVER_STANDBY):
-                if(ctx.author.voice):
-                    print('joining channel...')
-                    channel = ctx.author.voice.channel
-                    vc = await channel.connect()
-                    print('successfully joined channel!')
-                    vc.stop()
-                    self.guild_state_map[ctx.guild.id] = state.VC_STANDBY;
-                else:
-                    await ctx.channel.send('Join a voice channel first!')
-
-            elif(guild_state == state.VC_STANDBY):
-                await ctx.channel.send('I am already part of a voice channel. Use !leave and then !join in the channel you want me to be in')
-
-            elif(guild_state == state.VC_PLAYING):
-                await ctx.channel.send('I am current playing a song. Please stop it or use !leave')
-                
+            if(ctx.author.voice):
+                print('joining channel...')
+                channel = ctx.author.voice.channel
+                vc = await channel.connect()
+                print('successfully joined channel!')
+                vc.stop()
+            else:
+                await ctx.channel.send('Join a voice channel first!')
+                        
 
         @self.bot.command()
         async def leave(ctx):
