@@ -101,6 +101,7 @@ class client:
 
             try:
                 if song_there:
+                    print(f'file {song_file} already exisits, removing')
                     os.remove(song_file)
             except PermissionError:
                 return
