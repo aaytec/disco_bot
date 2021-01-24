@@ -11,11 +11,18 @@ from copy import deepcopy
 
 ydl_opts = {
     'format': 'bestaudio/best',
+    'extractaudio': True,
+    'noplaylist': True,
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
         'preferredquality': '192',
     }],
+}
+
+ffmpeg_opts = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn',
 }
 
 ydl_search_opts = {
@@ -33,12 +40,6 @@ def yt_search(arg):
             video = ydl.extract_info(arg, download=False)
 
     return video
-
-
-class state(Enum):
-    SERVER_STANDBY = 0,
-    VC_STANDBY = 1,
-    VC_PLAYING = 2
 
 class client:
     def __init__(self, auth_token):
@@ -79,29 +80,13 @@ class client:
                 vc.stop();
             
             await ctx.channel.send(f'playing {song}')
-
-            song_file = f'{ctx.guild.id}-song.mp3'
-            song_there = os.path.isfile(song_file)
-            ydl_opts_guild = deepcopy(ydl_opts)
-            ydl_opts_guild['outtmpl'] = song_file
-
-            try:
-                if song_there:
-                    print(f'file {song_file} already exisits, removing')
-                    os.remove(song_file)
-            except PermissionError:
-                return
             
-            try:
-                video_id = yt_search(song)['id']
-                with youtube_dl.YoutubeDL(ydl_opts_guild) as ydl:
-                    url = f'https://www.youtube.com/watch?v={video_id}'
-                    print(f'downloading {url}')
-                    ydl.download([url])
-
-                vc.play(discord.FFmpegPCMAudio(song_file))
+            try:    
+                song_info = yt_search(song)
+                url = song_info['url']
+                vc.play(discord.FFmpegPCMAudio(url, **ffmpeg_opts))
             except Exception:
-                await ctx.channel.send('Could not find song!')
+                await ctx.channel.send('Could not find/play song!')
 
         
         @self.bot.command()
