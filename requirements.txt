@@ -1,5 +1,5 @@
 discord
 youtube_dl
 pynacl
+python-dotenv
 requests
-dotenv
